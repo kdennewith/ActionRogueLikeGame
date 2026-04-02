@@ -6,6 +6,11 @@
 #include "GameFramework/Character.h"
 #include "RLCharacter.generated.h"
 
+struct FInputActionValue;
+class UInputAction;
+class USpringArmComponent;
+class UCameraComponent;
+
 UCLASS()
 class ACTIONRL_API ARLCharacter : public ACharacter
 {
@@ -16,8 +21,23 @@ public:
 	ARLCharacter();
 
 protected:
+	
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputAction> Input_Move;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputAction> Input_Look;
+	
+	UPROPERTY(VisibleAnywhere, Category="Components")
+	TObjectPtr<UCameraComponent> CameraComponent; //! The Camera
+	
+	UPROPERTY(VisibleAnywhere, Category="Components")
+	TObjectPtr<USpringArmComponent> SpringArmComponent; //! The SpringArm
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	void Move(const FInputActionValue& InValue);
 
 public:	
 	// Called every frame
