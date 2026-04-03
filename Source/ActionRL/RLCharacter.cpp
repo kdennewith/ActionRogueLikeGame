@@ -50,8 +50,6 @@ void ARLCharacter::Move(const FInputActionValue& InValue)
 {
 	FVector2D InputValue = InValue.Get<FVector2D>();
 	
-	//FVector MoveDirection = FVector(InputValue.X, InputValue.Y, 0.0f);
-	
 	FRotator ControlRot = GetControlRotation();
 	ControlRot.Pitch = 0.0f;
 	
@@ -74,6 +72,19 @@ void ARLCharacter::Look(const FInputActionInstance& InValue)
 void ARLCharacter::PrimaryAttack()
 {
 	
+	PlayAnimMontage(AttackMontage);
+	
+	//GetWorld()->GetTimerManager();
+	
+	FTimerHandle AttackTimerHandle;
+	
+	const float AttackDelayTime = 0.2f;
+	
+	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ARLCharacter::AttackTimerElapsed, AttackDelayTime);
+	
+}
+void ARLCharacter::AttackTimerElapsed()
+{
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
 	FRotator SpawnRotation = GetControlRotation();
 	FActorSpawnParameters SpawnParams;
@@ -82,7 +93,6 @@ void ARLCharacter::PrimaryAttack()
 	
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams); /* Spawns something */
 }
-
 // Called every frame
 void ARLCharacter::Tick(float DeltaTime)
 {
