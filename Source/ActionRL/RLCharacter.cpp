@@ -17,6 +17,7 @@ ARLCharacter::ARLCharacter()
 	//! SpringArm Component
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComponent->SetupAttachment(RootComponent); //! Attached to the Root Component
+	SpringArmComponent->bUsePawnControlRotation = true; /** bUse is a BluePrint control which is kinda cool */
 	
 	//! Camera Component
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp")); //! Use TEXT for good good.
@@ -33,11 +34,27 @@ void ARLCharacter::BeginPlay()
 
 void ARLCharacter::Move(const FInputActionValue& InValue)
 {
-	FVector2d InputValue = InValue.Get<FVector2D>();
+	FVector2D InputValue = InValue.Get<FVector2D>();
 	
-	FVector MoveDirection = FVector(InputValue.X, InputValue.Y, 0.0f);
+	//FVector MoveDirection = FVector(InputValue.X, InputValue.Y, 0.0f);
 	
-	AddMovementInput(MoveDirection);
+	FRotator ControlRot = GetControlRotation();
+	ControlRot.Pitch = 0.0f;
+	
+	// Forward & Back
+	AddMovementInput(ControlRot.Vector(), InputValue.X); /** This means it's going to move in the direction where Character Direction is going (1 Forward, -1 Backward) */
+	
+	//! Left & Right
+	FVector RightDirection = ControlRot.RotateVector(FVector::RightVector); /** This is for the Sideways movement inputs. (Right 1, Left -1) */
+	AddMovementInput(RightDirection, InputValue.Y);
+}
+
+void ARLCharacter::Look(const FInputActionInstance& InValue)
+{
+	FVector2D InputValue = InValue.GetValue().Get<FVector2D>();
+	
+	AddControllerPitchInput(InputValue.Y);
+	AddControllerYawInput(InputValue.X);
 }
 
 // Called every frame
@@ -55,5 +72,7 @@ void ARLCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	auto EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent); /** Standard Input Mapping UE5 */
 	
 	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ARLCharacter::Move);
+	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ARLCharacter::Look);
+	
 }
 
