@@ -34,6 +34,8 @@ void ARLProjectileMagic::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	
 	SphereComponent->OnComponentHit.AddDynamic(this, &ARLProjectileMagic::OnActorHit);
+	
+	SphereComponent->IgnoreActorWhenMoving(GetInstigator(), true);
 }
 
 void ARLProjectileMagic::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

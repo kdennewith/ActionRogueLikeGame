@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "RLCharacter.generated.h"
 
+class ARLProjectileMagic;
 struct FInputActionInstance;
 struct FInputActionValue;
 class UInputAction;
@@ -23,11 +24,20 @@ public:
 
 protected:
 	
+	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
+	TSubclassOf<ARLProjectileMagic> ProjectileClass;
+	
+	UPROPERTY(VisibleAnywhere, Category="PrimaryAttack")
+	FName MuzzleSocketName;
+	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> Input_Move;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> Input_Look;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputAction> Input_PrimaryAttack;
 	
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	TObjectPtr<UCameraComponent> CameraComponent; //! The Camera
@@ -41,7 +51,9 @@ protected:
 	void Move(const FInputActionValue& InValue);
 	
 	void Look(const FInputActionInstance& InValue);
-
+	
+	void PrimaryAttack();
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

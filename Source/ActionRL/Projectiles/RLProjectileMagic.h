@@ -11,7 +11,7 @@ class USphereComponent;
 class UProjectileMovementComponent;
 class UNiagaraComponent;
 
-UCLASS()
+UCLASS(Abstract)
 class ACTIONRL_API ARLProjectileMagic : public AActor
 {
 	GENERATED_BODY()
