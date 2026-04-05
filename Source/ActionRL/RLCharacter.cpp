@@ -7,6 +7,8 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 /* Constructor Defaults Values */
 ARLCharacter::ARLCharacter()
@@ -23,7 +25,7 @@ ARLCharacter::ARLCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp")); //! Use TEXT for good good.
 	CameraComponent->SetupAttachment(SpringArmComponent); //! Attached to the Root Component
 	
-	MuzzleSocketName = "Muzzle_01";
+	MuzzleSocketName = "Muzzle_01"; /* Used for the Projectile Hand */
 }
 
 // Called when the game starts or when spawned
@@ -42,8 +44,10 @@ void ARLCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	
 	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ARLCharacter::Move);
 	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ARLCharacter::Look);
+	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ARLCharacter::Jump); /** Assignment 1*/
 	
 	EnhancedInput->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ARLCharacter::PrimaryAttack);
+	
 }
 
 void ARLCharacter::Move(const FInputActionValue& InValue)
@@ -61,6 +65,7 @@ void ARLCharacter::Move(const FInputActionValue& InValue)
 	AddMovementInput(RightDirection, InputValue.Y);
 }
 
+/** Look */
 void ARLCharacter::Look(const FInputActionInstance& InValue)
 {
 	FVector2D InputValue = InValue.GetValue().Get<FVector2D>();
@@ -69,20 +74,25 @@ void ARLCharacter::Look(const FInputActionInstance& InValue)
 	AddControllerYawInput(InputValue.X);
 }
 
+/** Primary Attack */
 void ARLCharacter::PrimaryAttack()
 {
 	
 	PlayAnimMontage(AttackMontage);
 	
-	//GetWorld()->GetTimerManager();
-	
 	FTimerHandle AttackTimerHandle;
 	
 	const float AttackDelayTime = 0.2f;
 	
+	UNiagaraFunctionLibrary::SpawnSystemAttached(CastingEffect, GetMesh(), MuzzleSocketName,
+		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
+	
+	UGameplayStatics::PlaySound2D(this, CastingSound); /* Not for Multiplayer */
+	
 	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ARLCharacter::AttackTimerElapsed, AttackDelayTime);
 	
 }
+
 void ARLCharacter::AttackTimerElapsed()
 {
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
@@ -91,7 +101,9 @@ void ARLCharacter::AttackTimerElapsed()
 	SpawnParams.Instigator = this; /* Used for Damage Handling */
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams); /* Spawns something */
+	AActor* NewProjectile = GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams); /* Spawns something */
+	
+	MoveIgnoreActorAdd(NewProjectile); /* So the Projectile goes through your own character. */
 }
 // Called every frame
 void ARLCharacter::Tick(float DeltaTime)

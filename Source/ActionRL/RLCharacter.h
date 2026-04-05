@@ -9,10 +9,11 @@
 class ARLProjectileMagic;
 struct FInputActionInstance;
 struct FInputActionValue;
-class UInputAction;
-class USpringArmComponent;
-class UCameraComponent;
 class UAnimMontage;
+class UCameraComponent;
+class UInputAction;
+class UNiagaraSystem;
+class USpringArmComponent;
 
 UCLASS()
 class ACTIONRL_API ARLCharacter : public ACharacter
@@ -28,6 +29,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
 	TSubclassOf<ARLProjectileMagic> ProjectileClass;
 	
+	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
+	TObjectPtr<UNiagaraSystem> CastingEffect;
+	
+	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
+	TObjectPtr<USoundBase> CastingSound;
+	
 	UPROPERTY(VisibleAnywhere, Category="PrimaryAttack")
 	FName MuzzleSocketName;
 	
@@ -39,6 +46,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> Input_Look;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputAction> Input_Jump;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> Input_PrimaryAttack;
@@ -57,7 +67,7 @@ protected:
 	void Look(const FInputActionInstance& InValue);
 	
 	void PrimaryAttack();
-	
+
 	void AttackTimerElapsed();
 	
 public:	
