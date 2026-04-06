@@ -11,13 +11,17 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTIONRL_API URLInteractionComponent : public UActorComponent
 {
 	GENERATED_BODY()
+	
+protected:
+	
+	UPROPERTY(EditDefaultsOnly, Category="Interaction")
+	float InteractionRadius = 800.f;
+	
 
 public:
-
+	/** The Constructor */
 	URLInteractionComponent();
 
-public:
-
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 };
