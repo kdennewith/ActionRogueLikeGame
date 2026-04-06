@@ -3,7 +3,7 @@
 
 #include "RLGameMode.h"
 
-#include "ActionRL/Player/RLPlayerController.h"
+#include "Player/RLPlayerController.h"
 
 ARLGameMode::ARLGameMode()
 {	/** Adding the Character controller class to the Game Mode so it's set for the player */

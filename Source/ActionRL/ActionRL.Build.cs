@@ -7,7 +7,9 @@ public class ActionRL : ModuleRules
 	public ActionRL(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
+		
+		PublicIncludePaths.Add("ActionRL");
+		
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "EnhancedInput", "Niagara", } );

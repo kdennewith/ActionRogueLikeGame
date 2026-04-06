@@ -3,23 +3,38 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/RLInteractionInterface.h"
 #include "GameFramework/Actor.h"
 #include "RLItemChest.generated.h"
 
 UCLASS()
-class ACTIONRL_API ARLItemChest : public AActor
+class ACTIONRL_API ARLItemChest : public AActor, public IRLInteractionInterface
 {
 	GENERATED_BODY()
-
-public:
-	// Sets default values for this actor's properties
-	ARLItemChest();
-
+	
 protected:
-	// Called when the game starts or when spawned
+	
+	UPROPERTY(VisibleAnywhere, Category="Components")
+	TObjectPtr<UStaticMeshComponent> BaseMeshComponent; /* For the Chest itself, the base of it without the lid */
+	
+	UPROPERTY(VisibleAnywhere, Category="Components")
+	TObjectPtr<UStaticMeshComponent> LidMeshComponent; /** For the lid of the Chest */
+	
+	UPROPERTY(VisibleAnywhere, Category="Animation")
+	float AnimationSpeed = 50.f;
+	
+	UPROPERTY(VisibleAnywhere, Category="Animation")
+	float AnimationTargetPitch = 120.f;
+	
+	float CurrentAnimationPitch = 0.f;
+	
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
+	
+	ARLItemChest();
+	
+	virtual void Interact() override;
+	
 	virtual void Tick(float DeltaTime) override;
 };

@@ -17,11 +17,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Interaction")
 	float InteractionRadius = 800.f;
 	
+	UPROPERTY()
+	TObjectPtr<AActor> SelectedActor;
 
 public:
 	/** The Constructor */
 	URLInteractionComponent();
-
+	
+	void Interact();
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 };

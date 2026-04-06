@@ -3,24 +3,43 @@
 
 #include "RLItemChest.h"
 
-
-// Sets default values
 ARLItemChest::ARLItemChest()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-}
-
-// Called when the game starts or when spawned
-void ARLItemChest::BeginPlay()
-{
-	Super::BeginPlay();
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	
+	/** The Base and the Lid of the Chest */
+	BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMeshComp"));
+	RootComponent = BaseMeshComponent;
+	LidMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LidMeshComp"));
+	LidMeshComponent->SetupAttachment(BaseMeshComponent); /** Attached to the BaseMesh */
+	
 	
 }
 
-// Called every frame
+void ARLItemChest::Interact()
+{
+	SetActorTickEnabled(true); /** Play Animation of the Chest opening on Interaction (From the RLInteractionInterface) */
+}
+
+
+void ARLItemChest::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void ARLItemChest::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	CurrentAnimationPitch = FMath::FInterpConstantTo(CurrentAnimationPitch, AnimationTargetPitch, DeltaTime, AnimationSpeed);
+	LidMeshComponent->SetRelativeRotation(FRotator(CurrentAnimationPitch, 0.f, 0.f));
+	
+	if (FMath::IsNearlyEqual(CurrentAnimationPitch, AnimationTargetPitch))
+	{
+		SetActorTickEnabled(false);
+	}
+	
+	
 }
 
