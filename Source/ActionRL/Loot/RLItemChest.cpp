@@ -25,12 +25,6 @@ void ARLItemChest::Interact()
 	SetActorTickEnabled(true); /** Play Animation of the Chest opening on Interaction (From the RLInteractionInterface) */
 }
 
-
-void ARLItemChest::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void ARLItemChest::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -40,9 +34,9 @@ void ARLItemChest::Tick(float DeltaTime)
 	
 	if (FMath::IsNearlyEqual(CurrentAnimationPitch, AnimationTargetPitch))
 	{
-		SetActorTickEnabled(false);
+		SetActorTickEnabled(false); /** When the animation completes */
+		
+		ChestAnimationComplete();
 	}
-	
-	
 }
 

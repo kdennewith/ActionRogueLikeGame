@@ -28,7 +28,8 @@ protected:
 	
 	float CurrentAnimationPitch = 0.f;
 	
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintImplementableEvent)
+	void ChestAnimationComplete();
 
 public:
 	
