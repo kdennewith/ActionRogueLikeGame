@@ -3,6 +3,7 @@
 
 #include "RLInteractionComponent.h"
 
+#include "RLGameTypes.h"
 #include "Core/RLInteractionInterface.h"
 #include "Engine/OverlapResult.h"
 
@@ -28,9 +29,10 @@ void URLInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	
 	APlayerController* PC = Cast<APlayerController>(GetOwner());
 	FVector Center = PC->GetPawn()->GetActorLocation();
-	ECollisionChannel CollisionChannel = ECC_Visibility;
+	ECollisionChannel CollisionChannel = COLLISION_INTERACTION; /** An ECC TraceChannel, Engine Settings */
 	FCollisionShape Shape;
 	TArray<FOverlapResult> Overlaps;
+	
 	Shape.SetSphere(InteractionRadius);
 	GetWorld()->OverlapMultiByChannel(Overlaps, Center, FQuat::Identity, CollisionChannel, Shape);
 	

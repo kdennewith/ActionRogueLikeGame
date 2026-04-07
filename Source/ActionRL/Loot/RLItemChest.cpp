@@ -10,8 +10,11 @@ ARLItemChest::ARLItemChest()
 	
 	/** The Base and the Lid of the Chest */
 	BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMeshComp"));
+	BaseMeshComponent->SetCollisionProfileName("Interaction");
 	RootComponent = BaseMeshComponent;
+	
 	LidMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LidMeshComp"));
+	LidMeshComponent->SetCollisionProfileName("NoCollision");
 	LidMeshComponent->SetupAttachment(BaseMeshComponent); /** Attached to the BaseMesh */
 	
 	
