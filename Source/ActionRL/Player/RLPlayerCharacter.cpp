@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "RLCharacter.h"
+#include "RLPlayerCharacter.h"
 #include "Projectiles/RLProjectileMagic.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
@@ -11,7 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 
 /* Constructor Defaults Values */
-ARLCharacter::ARLCharacter()
+ARLPlayerCharacter::ARLPlayerCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -29,28 +29,28 @@ ARLCharacter::ARLCharacter()
 }
 
 // Called when the game starts or when spawned
-void ARLCharacter::BeginPlay()
+void ARLPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called to bind functionality to input
-void ARLCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ARLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	auto EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent); /** Standard Input Mapping UE5 */
 	
-	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ARLCharacter::Move);
-	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ARLCharacter::Look);
-	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ARLCharacter::Jump); /** Assignment 1*/
+	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Move);
+	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Look);
+	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Jump); /** Assignment 1*/
 	
-	EnhancedInput->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ARLCharacter::PrimaryAttack);
+	EnhancedInput->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::PrimaryAttack);
 	
 }
 
-void ARLCharacter::Move(const FInputActionValue& InValue)
+void ARLPlayerCharacter::Move(const FInputActionValue& InValue)
 {
 	FVector2D InputValue = InValue.Get<FVector2D>();
 	
@@ -66,7 +66,7 @@ void ARLCharacter::Move(const FInputActionValue& InValue)
 }
 
 /** Look */
-void ARLCharacter::Look(const FInputActionInstance& InValue)
+void ARLPlayerCharacter::Look(const FInputActionInstance& InValue)
 {
 	FVector2D InputValue = InValue.GetValue().Get<FVector2D>();
 	
@@ -75,7 +75,7 @@ void ARLCharacter::Look(const FInputActionInstance& InValue)
 }
 
 /** Primary Attack */
-void ARLCharacter::PrimaryAttack()
+void ARLPlayerCharacter::PrimaryAttack()
 {
 	
 	PlayAnimMontage(AttackMontage);
@@ -89,11 +89,11 @@ void ARLCharacter::PrimaryAttack()
 	
 	UGameplayStatics::PlaySound2D(this, CastingSound); /* Not for Multiplayer */
 	
-	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ARLCharacter::AttackTimerElapsed, AttackDelayTime);
+	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ARLPlayerCharacter::AttackTimerElapsed, AttackDelayTime);
 	
 }
 
-void ARLCharacter::AttackTimerElapsed()
+void ARLPlayerCharacter::AttackTimerElapsed()
 {
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
 	FRotator SpawnRotation = GetControlRotation();
@@ -106,7 +106,7 @@ void ARLCharacter::AttackTimerElapsed()
 	MoveIgnoreActorAdd(NewProjectile); /* So the Projectile goes through your own character. */
 }
 // Called every frame
-void ARLCharacter::Tick(float DeltaTime)
+void ARLPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 

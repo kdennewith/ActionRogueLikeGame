@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "RLCharacter.generated.h"
+#include "RLPlayerCharacter.generated.h"
 
 class ARLProjectileMagic;
 struct FInputActionInstance;
@@ -16,13 +16,13 @@ class UNiagaraSystem;
 class USpringArmComponent;
 
 UCLASS()
-class ACTIONRL_API ARLCharacter : public ACharacter
+class ACTIONRL_API ARLPlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	ARLCharacter();
+	ARLPlayerCharacter();
 
 protected:
 	
