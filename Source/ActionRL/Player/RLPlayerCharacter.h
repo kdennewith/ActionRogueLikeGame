@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "RLPlayerCharacter.generated.h"
 
+class ARLProjectileBase;
 class ARLProjectileMagic;
 struct FInputActionInstance;
 struct FInputActionValue;
@@ -27,7 +28,13 @@ public:
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
-	TSubclassOf<ARLProjectileMagic> ProjectileClass;
+	TSubclassOf<ARLProjectileBase> PrimaryAttackProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
+	TSubclassOf<ARLProjectileBase> SecondaryAttackProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
+	TSubclassOf<ARLProjectileBase> SpecialAttackProjectileClass;
 	
 	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
 	TObjectPtr<UNiagaraSystem> CastingEffect;
@@ -53,6 +60,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> Input_PrimaryAttack;
 	
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputAction> Input_SecondaryAttack;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputAction> Input_SpecialAttack;
+	
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	TObjectPtr<UCameraComponent> CameraComponent; //! The Camera
 	
@@ -66,9 +79,9 @@ protected:
 	
 	void Look(const FInputActionInstance& InValue);
 	
-	void PrimaryAttack();
+	void StartProjectileAttack(TSubclassOf<ARLProjectileBase> ProjectileClass);
 
-	void AttackTimerElapsed();
+	void AttackTimerElapsed(TSubclassOf<ARLProjectileBase> ProjectileClass);
 	
 public:	
 	// Called every frame

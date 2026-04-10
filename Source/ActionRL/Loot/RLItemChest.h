@@ -30,12 +30,12 @@ protected:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void ChestAnimationComplete();
-
+	
 public:
 	
 	ARLItemChest();
 	
-	virtual void Interact() override;
+	void Interact_Implementation() override;
 	
 	virtual void Tick(float DeltaTime) override;
 };

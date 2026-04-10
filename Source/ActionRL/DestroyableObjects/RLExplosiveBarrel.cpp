@@ -65,6 +65,9 @@ void ARLExplosiveBarrel::Explode()
 	
 	RadialForceComponent->FireImpulse(); /** This triggers the Impulse set in the Constructor */
 	
+	MeshComponent->AddImpulse(FVector::UpVector * 1000, NAME_None, true);
+	MeshComponent->AddAngularImpulseInDegrees(FVector::RightVector * 1000, NAME_None, true);
+	
 	/** For the Explosion Effect to spawn AT THE LOCATION of 'this' */
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ExplosionEffect, GetActorLocation(), FRotator::ZeroRotator);
 	

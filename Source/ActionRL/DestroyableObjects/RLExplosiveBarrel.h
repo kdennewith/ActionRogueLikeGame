@@ -38,6 +38,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Sound")
 	TObjectPtr<USoundBase> AftermathSound; /** The Aftermath of the Explosion Sound using USoundBase */
 	
+	UFUNCTION(BlueprintCallable)
 	void Explode(); /** The Explode Function */
 	
 	bool bExploded = false; /** boolean Exploded: if the Barrel has Exploded */

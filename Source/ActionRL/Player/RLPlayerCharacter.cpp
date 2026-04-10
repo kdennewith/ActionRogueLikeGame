@@ -42,22 +42,27 @@ void ARLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	auto EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent); /** Standard Input Mapping UE5 */
 	
-	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Move);
-	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Look);
-	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Jump); /** Assignment 1*/
+	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Move); /* The Move Binding */
+	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Look); /* The Look Binding */
+	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Jump); /** The Jump Binding */
 	
-	EnhancedInput->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::PrimaryAttack);
+	EnhancedInput->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, 
+		&ARLPlayerCharacter::StartProjectileAttack, PrimaryAttackProjectileClass); /* The Primary Attack Binding */
+	EnhancedInput->BindAction(Input_SecondaryAttack, ETriggerEvent::Triggered, this, 
+		&ARLPlayerCharacter::StartProjectileAttack, SecondaryAttackProjectileClass); /* The Secondary Attack Binding */
+	EnhancedInput->BindAction(Input_SpecialAttack, ETriggerEvent::Triggered, this, 
+		&ARLPlayerCharacter::StartProjectileAttack, SpecialAttackProjectileClass); /* The Special Attack Binding */
 	
 }
 
 void ARLPlayerCharacter::Move(const FInputActionValue& InValue)
 {
-	FVector2D InputValue = InValue.Get<FVector2D>();
+	FVector2D InputValue = InValue.Get<FVector2D>(); /* Get's the input value for the Movement keys and stores it in a 2D vector */
 	
-	FRotator ControlRot = GetControlRotation();
+	FRotator ControlRot = GetControlRotation(); /* Gets the current controller rotation Rotator Object, used for movement. */
 	ControlRot.Pitch = 0.0f;
 	
-	// Forward & Back
+	//! Forward & Back
 	AddMovementInput(ControlRot.Vector(), InputValue.X); /** This means it's going to move in the direction where Character Direction is going (1 Forward, -1 Backward) */
 	
 	//! Left & Right
@@ -65,7 +70,7 @@ void ARLPlayerCharacter::Move(const FInputActionValue& InValue)
 	AddMovementInput(RightDirection, InputValue.Y);
 }
 
-/** Look */
+/** Look Function */
 void ARLPlayerCharacter::Look(const FInputActionInstance& InValue)
 {
 	FVector2D InputValue = InValue.GetValue().Get<FVector2D>();
@@ -74,26 +79,28 @@ void ARLPlayerCharacter::Look(const FInputActionInstance& InValue)
 	AddControllerYawInput(InputValue.X);
 }
 
-/** Primary Attack */
-void ARLPlayerCharacter::PrimaryAttack()
+/** Start Projectile Attack Function */
+void ARLPlayerCharacter::StartProjectileAttack(TSubclassOf<ARLProjectileBase> ProjectileClass)
 {
 	
 	PlayAnimMontage(AttackMontage);
-	
-	FTimerHandle AttackTimerHandle;
-	
-	const float AttackDelayTime = 0.2f;
 	
 	UNiagaraFunctionLibrary::SpawnSystemAttached(CastingEffect, GetMesh(), MuzzleSocketName,
 		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
 	
 	UGameplayStatics::PlaySound2D(this, CastingSound); /* Not for Multiplayer */
 	
-	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &ARLPlayerCharacter::AttackTimerElapsed, AttackDelayTime);
+	FTimerHandle AttackTimerHandle;
+	const float AttackDelayTime = 0.2f;
+	
+	/* Using a Delegate to get the timer for the Projectile */
+	FTimerDelegate Delegate;
+	Delegate.BindUObject(this, &ARLPlayerCharacter::AttackTimerElapsed, ProjectileClass);
+	GetWorldTimerManager().SetTimer(AttackTimerHandle, Delegate, AttackDelayTime, false);
 	
 }
 
-void ARLPlayerCharacter::AttackTimerElapsed()
+void ARLPlayerCharacter::AttackTimerElapsed(TSubclassOf<ARLProjectileBase> ProjectileClass)
 {
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
 	FRotator SpawnRotation = GetControlRotation();
@@ -105,7 +112,8 @@ void ARLPlayerCharacter::AttackTimerElapsed()
 	
 	MoveIgnoreActorAdd(NewProjectile); /* So the Projectile goes through your own character. */
 }
-// Called every frame
+
+
 void ARLPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

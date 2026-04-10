@@ -3,18 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "RLProjectileBase.h"
 #include "RLProjectileMagic.generated.h"
 
 class UDamageType;
 class UNiagaraSystem;
-class USphereComponent;
-class UProjectileMovementComponent;
-class UNiagaraComponent;
-class UAudioComponent;
 
 UCLASS(Abstract)
-class ACTIONRL_API ARLProjectileMagic : public AActor
+class ACTIONRL_API ARLProjectileMagic : public ARLProjectileBase
 {
 	GENERATED_BODY()
 
@@ -23,31 +19,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Damage")
 	TSubclassOf<UDamageType> DmgTypeClass;
 	
-	UPROPERTY(EditDefaultsOnly, Category="Effects")
-	TObjectPtr<UNiagaraSystem> ExplosionEffect;
-	
-	UPROPERTY(EditDefaultsOnly, Category="Sound")
-	TObjectPtr<USoundBase> ExplosionSound;
-	
-	UPROPERTY(EditDefaultsOnly, Category="Components")
-	TObjectPtr<USphereComponent> SphereComponent;
-	
-	UPROPERTY(EditDefaultsOnly, Category="Components")
-	TObjectPtr<UAudioComponent> LoopedAudioComponent;
-	
-	UPROPERTY(EditDefaultsOnly, Category="Components")
-	TObjectPtr<UNiagaraComponent> LoopedNiagaraComponent;
-	
-	UPROPERTY(EditDefaultsOnly, Category="Components")
-	TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent;
-	
-	UFUNCTION()
-	void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-		FVector NormalImpulse, const FHitResult& Hit);
+	virtual void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+		FVector NormalImpulse, const FHitResult& Hit) override; /* Overriding the base implementation */
 	
 public:
-	
-	void virtual PostInitializeComponents() override;
 	
 	ARLProjectileMagic();
 };

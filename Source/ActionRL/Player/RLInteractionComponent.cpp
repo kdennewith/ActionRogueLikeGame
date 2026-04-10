@@ -16,11 +16,11 @@ URLInteractionComponent::URLInteractionComponent()
 
 void URLInteractionComponent::Interact()
 {
-	IRLInteractionInterface* InteractInterface = Cast<IRLInteractionInterface>(SelectedActor);
-	if (InteractInterface)
+	if (SelectedActor)
 	{
-		InteractInterface->Interact();
+		IRLInteractionInterface::Execute_Interact(SelectedActor);
 	}
+	
 }
 
 void URLInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -58,7 +58,7 @@ void URLInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	SelectedActor = BestActor;
 	
 	if (BestActor)
-	{
+	{ 
 		DrawDebugBox(GetWorld(), BestActor->GetActorLocation(), FVector(60.0f), FColor::Green);
 	}
 	

@@ -20,7 +20,7 @@ ARLItemChest::ARLItemChest()
 	
 }
 
-void ARLItemChest::Interact()
+void ARLItemChest::Interact_Implementation()
 {
 	SetActorTickEnabled(true); /** Play Animation of the Chest opening on Interaction (From the RLInteractionInterface) */
 }
@@ -36,7 +36,7 @@ void ARLItemChest::Tick(float DeltaTime)
 	{
 		SetActorTickEnabled(false); /** When the animation completes */
 		
-		ChestAnimationComplete();
+		ChestAnimationComplete(); /** Implemented with Blueprint */
 	}
 }
 
