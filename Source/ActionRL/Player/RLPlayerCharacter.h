@@ -15,6 +15,7 @@ class UCameraComponent;
 class UInputAction;
 class UNiagaraSystem;
 class USpringArmComponent;
+class URLActionSystemComponent;
 
 UCLASS()
 class ACTIONRL_API ARLPlayerCharacter : public ACharacter
@@ -72,6 +73,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	TObjectPtr<USpringArmComponent> SpringArmComponent; //! The SpringArm
 	
+	UPROPERTY(VisibleAnywhere, Category="Components")
+	TObjectPtr<URLActionSystemComponent> ActionSystemComponent;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
@@ -84,10 +88,11 @@ protected:
 	void AttackTimerElapsed(TSubclassOf<ARLProjectileBase> ProjectileClass);
 	
 public:	
-	// Called every frame
+	
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
+	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };

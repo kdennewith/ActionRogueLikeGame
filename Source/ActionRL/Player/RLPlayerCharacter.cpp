@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "ActionSystem/RLActionSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 /* Constructor Defaults Values */
@@ -15,6 +16,8 @@ ARLPlayerCharacter::ARLPlayerCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	ActionSystemComponent = CreateDefaultSubobject<URLActionSystemComponent>(TEXT("ActionSystemComp"));
 	
 	//! SpringArm Component
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
@@ -111,6 +114,17 @@ void ARLPlayerCharacter::AttackTimerElapsed(TSubclassOf<ARLProjectileBase> Proje
 	AActor* NewProjectile = GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams); /* Spawns something */
 	
 	MoveIgnoreActorAdd(NewProjectile); /* So the Projectile goes through your own character. */
+}
+
+float ARLPlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	/* Apply the Health Change Stuff here */
+	ActionSystemComponent->ApplyHealthChange(-DamageAmount);
+	
+	return ActualDamage;
 }
 
 
