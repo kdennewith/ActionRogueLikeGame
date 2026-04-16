@@ -49,6 +49,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
 	TObjectPtr<UAnimMontage> AttackMontage;
 	
+	UPROPERTY(EditDefaultsOnly, Category="Death")
+	TObjectPtr<UAnimMontage> DeathMontage;
+	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> Input_Move;
 	
@@ -73,11 +76,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	TObjectPtr<USpringArmComponent> SpringArmComponent; //! The SpringArm
 	
-	UPROPERTY(VisibleAnywhere, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<URLActionSystemComponent> ActionSystemComponent;
-	
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 	
 	void Move(const FInputActionValue& InValue);
 	
@@ -87,11 +87,13 @@ protected:
 
 	void AttackTimerElapsed(TSubclassOf<ARLProjectileBase> ProjectileClass);
 	
+	UFUNCTION()
+	void OnHealthChanged(float NewHealth, float OldHealth);
 public:	
 	
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	
-	virtual void Tick(float DeltaTime) override;
+	virtual void PostInitializeComponents() override;
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

@@ -8,7 +8,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "RLGameTypes.h"
 #include "ActionSystem/RLActionSystemComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 /* Constructor Defaults Values */
@@ -31,11 +33,11 @@ ARLPlayerCharacter::ARLPlayerCharacter()
 	MuzzleSocketName = "Muzzle_01"; /* Used for the Projectile Hand */
 }
 
-// Called when the game starts or when spawned
-void ARLPlayerCharacter::BeginPlay()
+void ARLPlayerCharacter::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 	
+	ActionSystemComponent->OnHealthChanged.AddDynamic(this, &ARLPlayerCharacter::OnHealthChanged);
 }
 
 // Called to bind functionality to input
@@ -105,19 +107,70 @@ void ARLPlayerCharacter::StartProjectileAttack(TSubclassOf<ARLProjectileBase> Pr
 
 void ARLPlayerCharacter::AttackTimerElapsed(TSubclassOf<ARLProjectileBase> ProjectileClass)
 {
-	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
-	FRotator SpawnRotation = GetControlRotation();
+	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName); /* Spawns from the hand of the Actor called MuzzleSocket1 on the Blueprint */
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Instigator = this; /* Used for Damage Handling */
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
-	AActor* NewProjectile = GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams); /* Spawns something */
+	FVector EyeLocation = CameraComponent->GetComponentLocation();
+	FRotator EyeRotation = GetControlRotation();
+	
+	FVector TraceEnd = EyeLocation + (EyeRotation.Vector() * 5000.f); /* Vector directly in front of the Characters Eyes, or the Camera */ 
+	
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	
+	UWorld* World = GetWorld(); /* Getting the World Pointer to not call GetWorld() over and over Below */
+	
+	FVector AdjustTargetLocation;
+	FHitResult Hit;
+	if (World->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, COLLISION_PROJECTILE, CollisionParams))
+	{
+		AdjustTargetLocation = Hit.Location;
+	}
+	else
+	{
+		AdjustTargetLocation = TraceEnd;
+	}
+	
+	FRotator SpawnRotation = (AdjustTargetLocation - SpawnLocation).Rotation();
+	
+	AActor* NewProjectile = World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams); /* Spawns something */
 	
 	MoveIgnoreActorAdd(NewProjectile); /* So the Projectile goes through your own character. */
+	
+	float DebugDrawDuration = 5.f;
+	
+	
+	/* The Hit Location or Trace end */
+	//DrawDebugBox(World, AdjustTargetLocation, FVector(20.f), FColor::Green, false, DebugDrawDuration);
+	
+	/* Adjustment Line Trace */
+	//DrawDebugLine(World, EyeLocation, TraceEnd, FColor::Green, false, DebugDrawDuration);
+	
+	/* New Projectile Path */
+	//DrawDebugLine(World, SpawnLocation, AdjustTargetLocation, FColor::Yellow, false, DebugDrawDuration);
+	
+	/* The original Path of the Projectile */
+	//DrawDebugLine(World, SpawnLocation, SpawnLocation + (GetControlRotation().Vector() * 5000.f), FColor::Purple,
+	//	false, DebugDrawDuration);
+}
+
+void ARLPlayerCharacter::OnHealthChanged(float NewHealth, float OldHealth)
+{
+	/* Dun Goofed and Died? */
+	if (FMath::IsNearlyZero(NewHealth))
+	{
+		DisableInput(nullptr); /* Disables the input on the Player and not the Controller so you can use a Menu when you die */
+		
+		GetMovementComponent()->StopMovementImmediately(); /* Stop the movement of the Pawn */
+		
+		PlayAnimMontage(DeathMontage); /* Plays the Death Animation */
+	}
 }
 
 float ARLPlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-	class AController* EventInstigator, AActor* DamageCauser)
+                                     class AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
@@ -125,12 +178,5 @@ float ARLPlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent con
 	ActionSystemComponent->ApplyHealthChange(-DamageAmount);
 	
 	return ActualDamage;
-}
-
-
-void ARLPlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
