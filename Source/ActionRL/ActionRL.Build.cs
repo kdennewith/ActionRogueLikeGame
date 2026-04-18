@@ -11,8 +11,9 @@ public class ActionRL : ModuleRules
 		PublicIncludePaths.Add("ActionRL");
 		
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
-
-		PrivateDependencyModuleNames.AddRange(new string[] { "EnhancedInput", "Niagara", } );
+		
+		/* Add modules here */
+		PrivateDependencyModuleNames.AddRange(new string[] { "EnhancedInput", "Niagara", "AIModule" } );
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

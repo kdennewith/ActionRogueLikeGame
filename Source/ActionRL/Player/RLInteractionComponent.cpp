@@ -53,7 +53,6 @@ void URLInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType
 		FVector BoxExtends;
 		Overlap.GetActor()->GetActorBounds(true, Origin, BoxExtends); /* Never use ChildActorComponent */
 		
-		FVector OverlapLocation = Overlap.GetActor()->GetActorLocation();
 		FVector OverlapDirection = (Origin - CameraLocation).GetSafeNormal();
 		
 		float DistanceToSqrd = (Origin - Center).SizeSquared(); /* Use SizeSquared to optimize */

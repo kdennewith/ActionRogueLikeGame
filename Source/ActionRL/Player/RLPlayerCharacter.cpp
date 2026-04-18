@@ -175,7 +175,7 @@ float ARLPlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent con
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
 	/* Apply the Health Change Stuff here */
-	ActionSystemComponent->ApplyHealthChange(-DamageAmount);
+	ActionSystemComponent->ApplyDamage(-DamageAmount);
 	
 	return ActualDamage;
 }
