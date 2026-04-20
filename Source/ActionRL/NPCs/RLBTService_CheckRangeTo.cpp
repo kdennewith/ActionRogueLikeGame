@@ -3,9 +3,15 @@
 
 #include "RLBTService_CheckRangeTo.h"
 
+#include "RLGameTypes.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "Runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 
+
+URLBTService_CheckRangeTo::URLBTService_CheckRangeTo()
+{
+	TargetActorKey.SelectedKeyName = NAME_TargetActor;
+}
 
 void URLBTService_CheckRangeTo::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
