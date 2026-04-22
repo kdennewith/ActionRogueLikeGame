@@ -35,10 +35,15 @@ public:
 	
 	void ApplyHealing(float inHealthValue);
 	
-	bool IsFullHealth();
+	bool IsFullHealth() const;
+	
+	float GetHealth() const;
+	
+	float GetMaxHealth() const;
 	
 	UPROPERTY(BlueprintAssignable) /* BlueprintAssignable is C++ Delegate specific */
 	FOnHealthChanged OnHealthChanged;
+	
 protected:
 	
 	UPROPERTY(BlueprintReadOnly, Category="Attributes")

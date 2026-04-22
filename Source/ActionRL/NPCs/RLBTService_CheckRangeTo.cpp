@@ -10,7 +10,7 @@
 
 URLBTService_CheckRangeTo::URLBTService_CheckRangeTo()
 {
-	TargetActorKey.SelectedKeyName = NAME_TargetActor;
+	TargetActorKey.SelectedKeyName = NAME_TargetActor_A;
 }
 
 void URLBTService_CheckRangeTo::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)

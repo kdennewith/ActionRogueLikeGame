@@ -17,9 +17,9 @@ void URLEnvQueryContext_TargetActor::ProvideContext(FEnvQueryInstance& QueryInst
 	if (ensure(QuerierPawn))
 	{
 		AAIController* Controller = Cast<AAIController>(QuerierPawn->GetController());
-		check(Controller);
+		ensure(Controller);
 		
-		AActor* TargetActor = Cast<AActor>(Controller->GetBlackboardComponent()->GetValueAsObject(NAME_TargetActor));
+		AActor* TargetActor = Cast<AActor>(Controller->GetBlackboardComponent()->GetValueAsObject(NAME_TargetActor_A));
 		UEnvQueryItemType_Actor::SetContextHelper(ContextData, TargetActor);	
 	}
 }

@@ -3,13 +3,24 @@
 
 #include "RLAICharacter.h"
 
+#include "ActionSystem/RLActionSystemComponent.h"
 
-// Sets default values
+
 ARLAICharacter::ARLAICharacter()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	ActionSystemComponent = CreateDefaultSubobject<URLActionSystemComponent>(TEXT("ActionSystemComp"));
 }
+
+float ARLAICharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	ActionSystemComponent->ApplyDamage(-ActualDamage);
+	
+	return ActualDamage;
+}
+
 
 
 

@@ -37,7 +37,7 @@ void URLActionSystemComponent::ApplyHealing(float inHealthValue)
 
 
 /** Checks if the Player is Full Health or Not */
-bool URLActionSystemComponent::IsFullHealth()
+bool URLActionSystemComponent::IsFullHealth() const
 {
 	bool bIsFullHealth = false;
 	if (FMath::IsNearlyEqual(Attributes.HealthMax, Attributes.Health))
@@ -45,6 +45,18 @@ bool URLActionSystemComponent::IsFullHealth()
 		bIsFullHealth = true;
 	}
 	return bIsFullHealth;
+}
+
+/** Gets the Health of the ActionSystemComp */
+float URLActionSystemComponent::GetHealth() const
+{
+	return Attributes.Health;
+}
+
+/** Gets the Max Health of the ActionComp */
+float URLActionSystemComponent::GetMaxHealth() const
+{
+	return Attributes.HealthMax;
 }
 
 

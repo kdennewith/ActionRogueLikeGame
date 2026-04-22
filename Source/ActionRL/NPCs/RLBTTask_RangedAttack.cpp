@@ -11,7 +11,7 @@
 
 URLBTTask_RangedAttack::URLBTTask_RangedAttack()
 {
-	TargetActorKey.SelectedKeyName = NAME_TargetActor;
+	TargetActorKey.SelectedKeyName = NAME_TargetActor_A;
 }
 
 EBTNodeResult::Type URLBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

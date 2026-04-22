@@ -29,5 +29,5 @@ public:
 	
 	URLBTService_CheckRangeTo();
 	
-	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaTime);
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaTime) override;
 };
