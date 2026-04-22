@@ -45,61 +45,83 @@ void ARLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	auto EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent); /** Standard Input Mapping UE5 */
+	/* Standard Input Mapping UE5 */
+	auto EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	
-	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Move); /* The Move Binding */
-	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Look); /* The Look Binding */
-	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Jump); /** The Jump Binding */
+	/* The Move Binding */
+	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Move);
 	
+	/* The Look Binding */
+	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Look);
+	
+	/** The Jump Binding */
+	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Jump);
+	
+	/* The Primary Attack Binding */
 	EnhancedInput->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, 
-		&ARLPlayerCharacter::StartProjectileAttack, PrimaryAttackProjectileClass); /* The Primary Attack Binding */
+		&ARLPlayerCharacter::StartAction, FName("PrimaryAttack"));
+	
+	/* The Secondary Attack Binding */
 	EnhancedInput->BindAction(Input_SecondaryAttack, ETriggerEvent::Triggered, this, 
-		&ARLPlayerCharacter::StartProjectileAttack, SecondaryAttackProjectileClass); /* The Secondary Attack Binding */
+		&ARLPlayerCharacter::StartProjectileAttack, SecondaryAttackProjectileClass);
+	
+	/* The Special Attack Binding */
 	EnhancedInput->BindAction(Input_SpecialAttack, ETriggerEvent::Triggered, this, 
-		&ARLPlayerCharacter::StartProjectileAttack, SpecialAttackProjectileClass); /* The Special Attack Binding */
+		&ARLPlayerCharacter::StartProjectileAttack, SpecialAttackProjectileClass);
 	
 }
 
 void ARLPlayerCharacter::Move(const FInputActionValue& InValue)
 {
-	FVector2D InputValue = InValue.Get<FVector2D>(); /* Get's the input value for the Movement keys and stores it in a 2D vector */
+	/* Get's the input value for the Movement keys and stores it in a 2D vector */
+	FVector2D InputValue = InValue.Get<FVector2D>();
 	
-	FRotator ControlRot = GetControlRotation(); /* Gets the current controller rotation Rotator Object, used for movement. */
+	/* Gets the current controller rotation Rotator Object, used for movement. */
+	FRotator ControlRot = GetControlRotation();
 	ControlRot.Pitch = 0.0f;
 	
-	//! Forward & Back
+	/* Forward & Back */
 	AddMovementInput(ControlRot.Vector(), InputValue.X); /** This means it's going to move in the direction where Character Direction is going (1 Forward, -1 Backward) */
 	
-	//! Left & Right
+	/* Left & Right */
 	FVector RightDirection = ControlRot.RotateVector(FVector::RightVector); /** This is for the Sideways movement inputs. (Right 1, Left -1) */
 	AddMovementInput(RightDirection, InputValue.Y);
 }
 
-/** Look Function */
+/** This function used for Looking around using X and Y Coordinates of the Input Value to control the Pitch and Yaw of
+ *  the PlayerControllerRotation through AddControllerPitchInput & AddControllerYawInput.	*/																				  
 void ARLPlayerCharacter::Look(const FInputActionInstance& InValue)
 {
 	FVector2D InputValue = InValue.GetValue().Get<FVector2D>();
 	
 	AddControllerPitchInput(InputValue.Y);
 	AddControllerYawInput(InputValue.X);
+	
 }
 
-/** Start Projectile Attack Function */
+/** This function plays an Attack Animation using a UAnimMontage that is set in BluePrint through the AttackMontage 
+ *  variable in the 'PrimaryAttack' Category.
+ */
 void ARLPlayerCharacter::StartProjectileAttack(TSubclassOf<ARLProjectileBase> ProjectileClass)
 {
-	
+	/* Plays the Animation Montage 'AttackMontage'<UAnimMontage> to simulate an Attack Animation */
 	PlayAnimMontage(AttackMontage);
 	
+	/* Input Params: SystemTemplate, AttachToComponent, AttachPoint, Location, Rotation, LocationType, AutoDestroy. 
+	 * Used to attach the CastingEffect to a Socket on a Mesh, in this case the RLPlayerCharacters Mesh. This will Auto
+	 * Destroy itself and uses Zero Vectors for Location and Rotation to not compromise the Muzzle Location.
+	 */
 	UNiagaraFunctionLibrary::SpawnSystemAttached(CastingEffect, GetMesh(), MuzzleSocketName,
 		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
 	
+	/* Plays the Casting Sound locally */
 	UGameplayStatics::PlaySound2D(this, CastingSound); /* Not for Multiplayer */
-	
-	FTimerHandle AttackTimerHandle;
-	const float AttackDelayTime = 0.2f;
 	
 	/* Using a Delegate to get the timer for the Projectile */
 	FTimerDelegate Delegate;
+	FTimerHandle AttackTimerHandle;
+	const float AttackDelayTime = 0.2f;
+	
 	Delegate.BindUObject(this, &ARLPlayerCharacter::AttackTimerElapsed, ProjectileClass);
 	GetWorldTimerManager().SetTimer(AttackTimerHandle, Delegate, AttackDelayTime, false);
 	
@@ -156,16 +178,24 @@ void ARLPlayerCharacter::AttackTimerElapsed(TSubclassOf<ARLProjectileBase> Proje
 	//	false, DebugDrawDuration);
 }
 
+void ARLPlayerCharacter::StartAction(FName InActionName)
+{
+	ActionSystemComponent->StartAction(InActionName);
+}
+
 void ARLPlayerCharacter::OnHealthChanged(float NewHealth, float OldHealth)
 {
 	/* Dun Goofed and Died? */
 	if (FMath::IsNearlyZero(NewHealth))
 	{
-		DisableInput(nullptr); /* Disables the input on the Player and not the Controller so you can use a Menu when you die */
+		/* Disables the input on the Player and not the Controller so you can use a Menu when you die */
+		DisableInput(nullptr);
 		
-		GetMovementComponent()->StopMovementImmediately(); /* Stop the movement of the Pawn */
+		/* Stop the movement of the Pawn */
+		GetMovementComponent()->StopMovementImmediately();
 		
-		PlayAnimMontage(DeathMontage); /* Plays the Death Animation */
+		/* Plays the Death Animation */
+		PlayAnimMontage(DeathMontage);
 	}
 }
 

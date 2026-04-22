@@ -79,6 +79,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<URLActionSystemComponent> ActionSystemComponent;
 	
+	UFUNCTION()
+	void OnHealthChanged(float NewHealth, float OldHealth);
+	
 	void Move(const FInputActionValue& InValue);
 	
 	void Look(const FInputActionInstance& InValue);
@@ -87,8 +90,7 @@ protected:
 
 	void AttackTimerElapsed(TSubclassOf<ARLProjectileBase> ProjectileClass);
 	
-	UFUNCTION()
-	void OnHealthChanged(float NewHealth, float OldHealth);
+	void StartAction(FName InActionName);
 	
 public:	
 	
