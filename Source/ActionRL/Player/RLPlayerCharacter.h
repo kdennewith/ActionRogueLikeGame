@@ -7,13 +7,11 @@
 #include "RLPlayerCharacter.generated.h"
 
 class ARLProjectileBase;
-class ARLProjectileMagic;
 struct FInputActionInstance;
 struct FInputActionValue;
 class UAnimMontage;
 class UCameraComponent;
 class UInputAction;
-class UNiagaraSystem;
 class USpringArmComponent;
 class URLActionSystemComponent;
 
@@ -37,18 +35,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
 	TSubclassOf<ARLProjectileBase> SpecialAttackProjectileClass;
 	
-	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
-	TObjectPtr<UNiagaraSystem> CastingEffect;
-	
-	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
-	TObjectPtr<USoundBase> CastingSound;
-	
-	UPROPERTY(VisibleAnywhere, Category="PrimaryAttack")
-	FName MuzzleSocketName;
-	
-	UPROPERTY(EditDefaultsOnly, Category="PrimaryAttack")
-	TObjectPtr<UAnimMontage> AttackMontage;
-	
 	UPROPERTY(EditDefaultsOnly, Category="Death")
 	TObjectPtr<UAnimMontage> DeathMontage;
 	
@@ -60,6 +46,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> Input_Jump;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputAction> Input_Sprint;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> Input_PrimaryAttack;
@@ -86,11 +75,9 @@ protected:
 	
 	void Look(const FInputActionInstance& InValue);
 	
-	void StartProjectileAttack(TSubclassOf<ARLProjectileBase> ProjectileClass);
-
-	void AttackTimerElapsed(TSubclassOf<ARLProjectileBase> ProjectileClass);
-	
 	void StartAction(FName InActionName);
+	
+	void StopAction(FName InActionName);
 	
 public:	
 	

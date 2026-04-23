@@ -2,16 +2,12 @@
 
 
 #include "RLPlayerCharacter.h"
-#include "Projectiles/RLProjectileMagic.h"
+#include "ActionSystem/RLActionSystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
-#include "NiagaraFunctionLibrary.h"
-#include "RLGameTypes.h"
-#include "ActionSystem/RLActionSystemComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 /* Constructor Defaults Values */
 ARLPlayerCharacter::ARLPlayerCharacter()
@@ -29,15 +25,13 @@ ARLPlayerCharacter::ARLPlayerCharacter()
 	//! Camera Component
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp")); //! Use TEXT for good good.
 	CameraComponent->SetupAttachment(SpringArmComponent); //! Attached to the Root Component
-	
-	MuzzleSocketName = "Muzzle_01"; /* Used for the Projectile Hand */
 }
 
 void ARLPlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	
-	ActionSystemComponent->OnHealthChanged.AddDynamic(this, &ARLPlayerCharacter::OnHealthChanged);
+	ActionSystemComponent->OnHealthChanged.AddDynamic(this, &ThisClass::OnHealthChanged);
 }
 
 // Called to bind functionality to input
@@ -49,25 +43,33 @@ void ARLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	auto EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	
 	/* The Move Binding */
-	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Move);
+	EnhancedInput->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ThisClass::Move);
 	
 	/* The Look Binding */
-	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Look);
+	EnhancedInput->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ThisClass::Look);
 	
 	/** The Jump Binding */
-	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ARLPlayerCharacter::Jump);
+	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ThisClass::Jump);
+	
+	/* The Sprint Start Binding */
+	EnhancedInput->BindAction(Input_Sprint, ETriggerEvent::Started, this, 
+		&ThisClass::StartAction, FName("Sprint"));
+	
+	/* The Sprint Complete Binding */
+	EnhancedInput->BindAction(Input_Sprint, ETriggerEvent::Completed, this, 
+		&ThisClass::StopAction, FName("Sprint"));
 	
 	/* The Primary Attack Binding */
 	EnhancedInput->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, 
-		&ARLPlayerCharacter::StartAction, FName("PrimaryAttack"));
+		&ThisClass::StartAction, FName("PrimaryAttack"));
 	
 	/* The Secondary Attack Binding */
 	EnhancedInput->BindAction(Input_SecondaryAttack, ETriggerEvent::Triggered, this, 
-		&ARLPlayerCharacter::StartProjectileAttack, SecondaryAttackProjectileClass);
+		&ThisClass::StartAction, FName("SecondaryAttack"));
 	
 	/* The Special Attack Binding */
 	EnhancedInput->BindAction(Input_SpecialAttack, ETriggerEvent::Triggered, this, 
-		&ARLPlayerCharacter::StartProjectileAttack, SpecialAttackProjectileClass);
+		&ThisClass::StartAction, FName("SpecialAttack"));
 	
 }
 
@@ -99,88 +101,15 @@ void ARLPlayerCharacter::Look(const FInputActionInstance& InValue)
 	
 }
 
-/** This function plays an Attack Animation using a UAnimMontage that is set in BluePrint through the AttackMontage 
- *  variable in the 'PrimaryAttack' Category.
- */
-void ARLPlayerCharacter::StartProjectileAttack(TSubclassOf<ARLProjectileBase> ProjectileClass)
-{
-	/* Plays the Animation Montage 'AttackMontage'<UAnimMontage> to simulate an Attack Animation */
-	PlayAnimMontage(AttackMontage);
-	
-	/* Input Params: SystemTemplate, AttachToComponent, AttachPoint, Location, Rotation, LocationType, AutoDestroy. 
-	 * Used to attach the CastingEffect to a Socket on a Mesh, in this case the RLPlayerCharacters Mesh. This will Auto
-	 * Destroy itself and uses Zero Vectors for Location and Rotation to not compromise the Muzzle Location.
-	 */
-	UNiagaraFunctionLibrary::SpawnSystemAttached(CastingEffect, GetMesh(), MuzzleSocketName,
-		FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
-	
-	/* Plays the Casting Sound locally */
-	UGameplayStatics::PlaySound2D(this, CastingSound); /* Not for Multiplayer */
-	
-	/* Using a Delegate to get the timer for the Projectile */
-	FTimerDelegate Delegate;
-	FTimerHandle AttackTimerHandle;
-	const float AttackDelayTime = 0.2f;
-	
-	Delegate.BindUObject(this, &ARLPlayerCharacter::AttackTimerElapsed, ProjectileClass);
-	GetWorldTimerManager().SetTimer(AttackTimerHandle, Delegate, AttackDelayTime, false);
-	
-}
-
-void ARLPlayerCharacter::AttackTimerElapsed(TSubclassOf<ARLProjectileBase> ProjectileClass)
-{
-	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName); /* Spawns from the hand of the Actor called MuzzleSocket1 on the Blueprint */
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Instigator = this; /* Used for Damage Handling */
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	
-	FVector EyeLocation = CameraComponent->GetComponentLocation();
-	FRotator EyeRotation = GetControlRotation();
-	
-	FVector TraceEnd = EyeLocation + (EyeRotation.Vector() * 5000.f); /* Vector directly in front of the Characters Eyes, or the Camera */ 
-	
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
-	
-	UWorld* World = GetWorld(); /* Getting the World Pointer to not call GetWorld() over and over Below */
-	
-	FVector AdjustTargetLocation;
-	FHitResult Hit;
-	if (World->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, COLLISION_PROJECTILE, CollisionParams))
-	{
-		AdjustTargetLocation = Hit.Location;
-	}
-	else
-	{
-		AdjustTargetLocation = TraceEnd;
-	}
-	
-	FRotator SpawnRotation = (AdjustTargetLocation - SpawnLocation).Rotation();
-	
-	AActor* NewProjectile = World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams); /* Spawns something */
-	
-	MoveIgnoreActorAdd(NewProjectile); /* So the Projectile goes through your own character. */
-	
-	float DebugDrawDuration = 5.f;
-	
-	
-	/* The Hit Location or Trace end */
-	//DrawDebugBox(World, AdjustTargetLocation, FVector(20.f), FColor::Green, false, DebugDrawDuration);
-	
-	/* Adjustment Line Trace */
-	//DrawDebugLine(World, EyeLocation, TraceEnd, FColor::Green, false, DebugDrawDuration);
-	
-	/* New Projectile Path */
-	//DrawDebugLine(World, SpawnLocation, AdjustTargetLocation, FColor::Yellow, false, DebugDrawDuration);
-	
-	/* The original Path of the Projectile */
-	//DrawDebugLine(World, SpawnLocation, SpawnLocation + (GetControlRotation().Vector() * 5000.f), FColor::Purple,
-	//	false, DebugDrawDuration);
-}
-
+/** Starts an Action for the RLPlayerCharacter */
 void ARLPlayerCharacter::StartAction(FName InActionName)
 {
 	ActionSystemComponent->StartAction(InActionName);
+}
+
+void ARLPlayerCharacter::StopAction(FName InActionName)
+{
+	ActionSystemComponent->StopAction(InActionName);
 }
 
 void ARLPlayerCharacter::OnHealthChanged(float NewHealth, float OldHealth)

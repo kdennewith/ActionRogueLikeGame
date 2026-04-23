@@ -2,25 +2,26 @@
 
 
 #include "RLActionSystemComponent.h"
-
-#include <ThirdParty/ShaderConductor/ShaderConductor/External/DirectXShaderCompiler/include/dxc/DXIL/DxilConstants.h>
-
 #include "RLAction.h"
 
-
+/** Constructor */
 URLActionSystemComponent::URLActionSystemComponent()
 {
 	bWantsInitializeComponent = true;
 }
 
-/* Initializes the Component on Level Startup */
+/* Initializes the Component on Level Startup, Fills up the Action Array */
 void URLActionSystemComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 	
-	URLAction* NewAction = NewObject<URLAction>(this, URLAction::StaticClass());
-	Actions.Add(NewAction);
-	
+	for (TSubclassOf<URLAction> ActionClass : DefaultActions)
+	{
+		if (ensure(ActionClass))
+		{
+			GrantAction(ActionClass);
+		}
+	}
 }
 
 /** Controls the Health Changes of the PlayerCharacter */
@@ -83,12 +84,37 @@ void URLActionSystemComponent::StartAction(FName InActionName)
 	{
 		if (Action->GetActionName() == InActionName)
 		{
-			Action->StartAction();
+			if (Action->CanStart())
+			{
+				Action->StartAction();
+			}
 			return;
 		}
 	}
 	
 	UE_LOG(LogTemp, Log, TEXT("Action %s not found"), *InActionName.ToString()) // For Logging if Needed
+}
+
+/* Stops an Action like on Sprinting */
+void URLActionSystemComponent::StopAction(FName InActionName)
+{
+	for (URLAction* Action : Actions)
+	{
+		if (Action->GetActionName() == InActionName)
+		{
+			Action->StopAction();
+			return;
+		}
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("Action %s not found"), *InActionName.ToString()) // For Logging if Needed
+}
+
+/** Grants Actions/Abilities to the RLActionSystemComponent as an Array in Actions */
+void URLActionSystemComponent::GrantAction(TSubclassOf<URLAction> NewActionClass)
+{
+	URLAction* NewAction = NewObject<URLAction>(this, NewActionClass);
+	Actions.Add(NewAction);
 }
 
 

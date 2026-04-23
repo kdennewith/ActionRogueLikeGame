@@ -7,20 +7,19 @@
 #include "RLActionSystemComponent.generated.h"
 
 class URLAction;
+
+/* Holds the Attributes for the RLActionSystemComponent */
 USTRUCT(BlueprintType)
-struct FRogueAttributeSet /* Holds the Attributes for the PlayerCharacter */
+struct FRogueAttributeSet
 {
 	GENERATED_BODY()
-	
 	FRogueAttributeSet()
 		: Health(100.0f), HealthMax(100.0f) {}
 	
 	UPROPERTY(BlueprintReadOnly)
 	float Health;
-	
 	UPROPERTY(BlueprintReadOnly)
 	float HealthMax;
-	
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, NewHealth, float, OldHealth);
@@ -30,13 +29,24 @@ class ACTIONRL_API URLActionSystemComponent : public UActorComponent
 {
 	GENERATED_BODY()
 	
+public:
+	
+	/* BlueprintAssignable is C++ Delegate specific */
+	UPROPERTY(BlueprintAssignable)
+	FOnHealthChanged OnHealthChanged;
+	
 protected:
 	
+	/* The set of Attributes used by the PlayerCharacter */
 	UPROPERTY(BlueprintReadOnly, Category="Attributes")
-	FRogueAttributeSet Attributes {}; /* The set of Attributes used by the PlayerCharacter */
+	FRogueAttributeSet Attributes {};
 	
+	/* An array to hold all the Actions for the Character */
 	UPROPERTY()
-	TArray<TObjectPtr<URLAction>> Actions; /* An array to hold all the Actions for the Character */
+	TArray<TObjectPtr<URLAction>> Actions;
+	
+	UPROPERTY(EditAnywhere, Category="Actions")
+	TArray<TSubclassOf<URLAction>> DefaultActions;
 	
 public:
 	
@@ -44,10 +54,6 @@ public:
 	
 	/* Initializes the Component on Level Startup */
 	virtual void InitializeComponent() override;
-	
-	/* BlueprintAssignable is C++ Delegate specific */
-	UPROPERTY(BlueprintAssignable)
-	FOnHealthChanged OnHealthChanged;
 	
 	/** Function to Apply Damage to an Actor */
 	void ApplyDamage(float InValueChange);
@@ -66,4 +72,10 @@ public:
 	
 	/** Starts an Actor Action */
 	void StartAction(FName InActionName);
+	
+	/** Starts an Actor Action */
+	void StopAction(FName InActionName);
+	
+	/** Grants Actions/Abilities to the RLActionSystemComponent as an Array in Actions */
+	void GrantAction(TSubclassOf<URLAction> NewActionClass);
 };
