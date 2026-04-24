@@ -6,6 +6,8 @@
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
+#include "GameplayTagContainer.h"
+#include "RLGameplayTags.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 
@@ -51,25 +53,25 @@ void ARLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	/** The Jump Binding */
 	EnhancedInput->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ThisClass::Jump);
 	
-	/* The Sprint Start Binding */
+	/* The Sprint Start Binding with a Gameplay Tag */
 	EnhancedInput->BindAction(Input_Sprint, ETriggerEvent::Started, this, 
-		&ThisClass::StartAction, FName("Sprint"));
+		&ThisClass::StartAction, RLGameplayTags::Action_Sprint.GetTag());
 	
 	/* The Sprint Complete Binding */
 	EnhancedInput->BindAction(Input_Sprint, ETriggerEvent::Completed, this, 
-		&ThisClass::StopAction, FName("Sprint"));
+		&ThisClass::StopAction, RLGameplayTags::Action_Sprint.GetTag());
 	
 	/* The Primary Attack Binding */
 	EnhancedInput->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, 
-		&ThisClass::StartAction, FName("PrimaryAttack"));
+		&ThisClass::StartAction, RLGameplayTags::Action_PrimaryAttack.GetTag());
 	
 	/* The Secondary Attack Binding */
 	EnhancedInput->BindAction(Input_SecondaryAttack, ETriggerEvent::Triggered, this, 
-		&ThisClass::StartAction, FName("SecondaryAttack"));
+		&ThisClass::StartAction, RLGameplayTags::Action_SecondaryAttack.GetTag());
 	
 	/* The Special Attack Binding */
 	EnhancedInput->BindAction(Input_SpecialAttack, ETriggerEvent::Triggered, this, 
-		&ThisClass::StartAction, FName("SpecialAttack"));
+		&ThisClass::StartAction, RLGameplayTags::Action_SpecialAttack.GetTag());
 	
 }
 
@@ -102,12 +104,12 @@ void ARLPlayerCharacter::Look(const FInputActionInstance& InValue)
 }
 
 /** Starts an Action for the RLPlayerCharacter */
-void ARLPlayerCharacter::StartAction(FName InActionName)
+void ARLPlayerCharacter::StartAction(FGameplayTag InActionName)
 {
 	ActionSystemComponent->StartAction(InActionName);
 }
 
-void ARLPlayerCharacter::StopAction(FName InActionName)
+void ARLPlayerCharacter::StopAction(FGameplayTag InActionName)
 {
 	ActionSystemComponent->StopAction(InActionName);
 }
@@ -134,7 +136,7 @@ float ARLPlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent con
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
 	/* Apply the Health Change Stuff here */
-	ActionSystemComponent->ApplyDamage(-DamageAmount);
+	ActionSystemComponent->ApplyAttributeChange(RLGameplayTags::Attribute_Health, -DamageAmount, EAttributeModifyType::Base);
 	
 	return ActualDamage;
 }

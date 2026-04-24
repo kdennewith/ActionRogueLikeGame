@@ -11,8 +11,10 @@ void URLAction::StartAction_Implementation()
 	
 	float GameTime = GetWorld()->TimeSeconds;
 	UE_LOGFMT(LogTemp, Log, "Started Action {ActionName} - {WorldTime}", 
-		("ActionName", ActionName),
+		("ActionName", ActionName.ToString()),
 		("WorldTime", GameTime));
+	
+	GetOwningComponent()->ActiveGameplayTags.AppendTags(GrantTags);
 }
 
 void URLAction::StopAction_Implementation()
@@ -21,10 +23,12 @@ void URLAction::StopAction_Implementation()
 	
 	float GameTime = GetWorld()->TimeSeconds;
 	UE_LOGFMT(LogTemp, Log, "Stopped Action {ActionName} - {WorldTime}", 
-		("ActionName", ActionName),
+		("ActionName", ActionName.ToString()),
 		("WorldTime", GameTime));
 	
 	CooldownUntil = GetWorld()->TimeSeconds + CooldownTime;
+	
+	GetOwningComponent()->ActiveGameplayTags.RemoveTags(GrantTags);
 }
 
 URLActionSystemComponent* URLAction::GetOwningComponent() const
@@ -45,6 +49,11 @@ bool URLAction::CanStart()
 		return false;
 	}
 	
+	/* Not allowed to run the Action based on the Blocked Tags */
+	if (GetOwningComponent()->ActiveGameplayTags.HasAny(BlockedTags))
+	{
+		return false;
+	}
 	return true;
 }
 

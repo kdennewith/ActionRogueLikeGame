@@ -3,24 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
+#include "RLAttributeSet.h"
 #include "Components/ActorComponent.h"
 #include "RLActionSystemComponent.generated.h"
 
+class URLAttributeSet;
+struct FGameplayTag;
 class URLAction;
 
-/* Holds the Attributes for the RLActionSystemComponent */
-USTRUCT(BlueprintType)
-struct FRogueAttributeSet
+UENUM()
+enum class EAttributeModifyType
 {
-	GENERATED_BODY()
-	FRogueAttributeSet()
-		: Health(100.0f), HealthMax(100.0f) {}
-	
-	UPROPERTY(BlueprintReadOnly)
-	float Health;
-	UPROPERTY(BlueprintReadOnly)
-	float HealthMax;
+	Base,
+	Modifier,
+	OverrideBase,
+	Invalid,
 };
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, NewHealth, float, OldHealth);
 
@@ -35,16 +35,24 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
 	
+	FGameplayTagContainer ActiveGameplayTags;
+	
 protected:
 	
-	/* The set of Attributes used by the PlayerCharacter */
 	UPROPERTY(BlueprintReadOnly, Category="Attributes")
-	FRogueAttributeSet Attributes {};
+	TObjectPtr<URLAttributeSet> Attributes;
+	
+	
+	TMap<FGameplayTag, FRLAttribute*> CachedAttributes;
+	
+	UPROPERTY(EditAnywhere, Category="Attributes")
+	TSubclassOf<URLAttributeSet> AttributeSetClass;
 	
 	/* An array to hold all the Actions for the Character */
 	UPROPERTY()
 	TArray<TObjectPtr<URLAction>> Actions;
 	
+	/* For Blueprint */
 	UPROPERTY(EditAnywhere, Category="Actions")
 	TArray<TSubclassOf<URLAction>> DefaultActions;
 	
@@ -55,27 +63,18 @@ public:
 	/* Initializes the Component on Level Startup */
 	virtual void InitializeComponent() override;
 	
-	/** Function to Apply Damage to an Actor */
-	void ApplyDamage(float InValueChange);
+	/* Applies a change to a ActionSystemComponents Attribute */
+	void ApplyAttributeChange(FGameplayTag AttributeTag, float InValue, EAttributeModifyType ModifyType);
 	
-	/** Function to Apply Healing to an Actor */
-	void ApplyHealing(float inHealthValue);
-	
-	/** Checks if the Health of the Actor is full */
-	bool IsFullHealth() const;
-	
-	/** Gets the Health of the Actor */
-	float GetHealth() const;
-	
-	/** Gets the Max Health of the Actor */
-	float GetMaxHealth() const;
+	FRLAttribute* GetAttribute(FGameplayTag InAttributeTag);
 	
 	/** Starts an Actor Action */
-	void StartAction(FName InActionName);
+	void StartAction(FGameplayTag InActionName);
 	
 	/** Starts an Actor Action */
-	void StopAction(FName InActionName);
+	void StopAction(FGameplayTag InActionName);
 	
 	/** Grants Actions/Abilities to the RLActionSystemComponent as an Array in Actions */
 	void GrantAction(TSubclassOf<URLAction> NewActionClass);
+	
 };

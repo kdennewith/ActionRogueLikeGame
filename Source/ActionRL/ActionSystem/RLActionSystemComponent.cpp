@@ -3,17 +3,36 @@
 
 #include "RLActionSystemComponent.h"
 #include "RLAction.h"
+#include "RLAttributeSet.h"
 
 /** Constructor */
 URLActionSystemComponent::URLActionSystemComponent()
 {
 	bWantsInitializeComponent = true;
+	
+	AttributeSetClass = URLAttributeSet::StaticClass();
 }
 
 /* Initializes the Component on Level Startup, Fills up the Action Array */
 void URLActionSystemComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
+	
+	Attributes = NewObject<URLAttributeSet>(this, AttributeSetClass);
+	
+	for (TFieldIterator<FStructProperty> PropIt(Attributes->GetClass()); PropIt; ++PropIt)
+	{
+		/* Right now it's just HP and HP MAX is all the Attributes */
+		FRLAttribute* FoundAttribute = PropIt->ContainerPtrToValuePtr<FRLAttribute>(Attributes);
+		
+		 /* Getting the name of the Tag as an FName */
+		FName AttributeTagName = FName("Attribute." + PropIt->GetName());
+		
+		/* Using the FName to get the GameplayTag */
+		FGameplayTag AttributeTag = FGameplayTag::RequestGameplayTag(AttributeTagName);
+		
+		CachedAttributes.Add(AttributeTag ,FoundAttribute);
+	}
 	
 	for (TSubclassOf<URLAction> ActionClass : DefaultActions)
 	{
@@ -24,60 +43,8 @@ void URLActionSystemComponent::InitializeComponent()
 	}
 }
 
-/** Controls the Health Changes of the PlayerCharacter */
-void URLActionSystemComponent::ApplyDamage(float InValueChange)
-{
-	float OldHealth = Attributes.Health; /* Never should be allowed to go Below 0 */
-	
-	Attributes.Health = FMath::Clamp(Attributes.Health + InValueChange, 0.f, Attributes.HealthMax); /* Changes the Health Value based on the InValueChange, ensure that it's between 0.f and Attributes.HealthMax */
-	
-	if (!FMath::IsNearlyZero(OldHealth, Attributes.Health))
-	{
-		OnHealthChanged.Broadcast(Attributes.Health, OldHealth);
-	}
-	
-	UE_LOG(LogTemp, Log, TEXT("Health Changed %f, Max Health: %f"), Attributes.Health, Attributes.HealthMax);
-}
-
-/** Function to Apply Healing to an Actor */
-void URLActionSystemComponent::ApplyHealing(float inHealthValue)
-{
-	float OldHealth = Attributes.Health; /* Never should be allowed to go Below 0 */
-	
-	Attributes.Health = FMath::Clamp(Attributes.Health + inHealthValue, 0.f, Attributes.HealthMax); /* Changes the Health Value based on the InValueChange, ensure that it's between 0.f and Attributes.HealthMax */
-	
-	OnHealthChanged.Broadcast(Attributes.Health, OldHealth);
-	
-	
-	UE_LOG(LogTemp, Log, TEXT("Health Changed %f, Max Health: %f"), Attributes.Health, Attributes.HealthMax);
-}
-
-
-/** Checks if the Player is Full Health or Not */
-bool URLActionSystemComponent::IsFullHealth() const
-{
-	bool bIsFullHealth = false;
-	if (FMath::IsNearlyEqual(Attributes.HealthMax, Attributes.Health))
-	{
-		bIsFullHealth = true;
-	}
-	return bIsFullHealth;
-}
-
-/** Gets the Health of the ActionSystemComp */
-float URLActionSystemComponent::GetHealth() const
-{
-	return Attributes.Health;
-}
-
-/** Gets the Max Health of the ActionComp */
-float URLActionSystemComponent::GetMaxHealth() const
-{
-	return Attributes.HealthMax;
-}
-
 /** Starts an Actors Action if the Action Exists */
-void URLActionSystemComponent::StartAction(FName InActionName)
+void URLActionSystemComponent::StartAction(FGameplayTag InActionName)
 {
 	//todo: Add a linear time search with a Map instead of an Array.
 	for (URLAction* Action : Actions)
@@ -96,7 +63,7 @@ void URLActionSystemComponent::StartAction(FName InActionName)
 }
 
 /* Stops an Action like on Sprinting */
-void URLActionSystemComponent::StopAction(FName InActionName)
+void URLActionSystemComponent::StopAction(FGameplayTag InActionName)
 {
 	for (URLAction* Action : Actions)
 	{
@@ -115,6 +82,44 @@ void URLActionSystemComponent::GrantAction(TSubclassOf<URLAction> NewActionClass
 {
 	URLAction* NewAction = NewObject<URLAction>(this, NewActionClass);
 	Actions.Add(NewAction);
+}
+
+void URLActionSystemComponent::ApplyAttributeChange(FGameplayTag AttributeTag, float InValue, EAttributeModifyType ModifyType)
+{
+	FRLAttribute* FoundAttribute = GetAttribute(AttributeTag);
+	check(FoundAttribute);
+	
+	FoundAttribute->Modifier += InValue;
+	
+	switch (ModifyType)
+	{
+	case EAttributeModifyType::Base:
+		FoundAttribute->Base += InValue;
+		break;
+	case EAttributeModifyType::Modifier:
+		FoundAttribute->Modifier += InValue;
+		break;
+	case EAttributeModifyType::OverrideBase:
+		FoundAttribute->Base = InValue;
+		break;
+	case EAttributeModifyType::Invalid:
+		FoundAttribute->Base += InValue;
+		break;
+	default:
+		check(false);
+	}
+	
+	/* Clamps the Attribute Change */
+	Attributes->PostAttributeChanged();
+	
+	UE_LOGFMT(LogTemp, Log, "Attribute: {0}, New: {1}");
+}
+
+FRLAttribute* URLActionSystemComponent::GetAttribute(FGameplayTag InAttributeTag)
+{
+	/* A Pointer to a Pointer */
+	FRLAttribute** FoundAttribute = CachedAttributes.Find(InAttributeTag);
+	return *FoundAttribute;
 }
 
 

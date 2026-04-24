@@ -10,10 +10,10 @@ public class ActionRL : ModuleRules
 		
 		PublicIncludePaths.Add("ActionRL");
 		
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
 		
 		/* Add modules here */
-		PrivateDependencyModuleNames.AddRange(new string[] { "EnhancedInput", "Niagara", "AIModule" } );
+		PrivateDependencyModuleNames.AddRange(new string[] { "EnhancedInput", "Niagara", "AIModule", "GameplayTags" } );
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

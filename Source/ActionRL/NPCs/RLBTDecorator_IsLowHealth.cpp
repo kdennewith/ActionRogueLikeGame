@@ -4,6 +4,7 @@
 #include "RLBTDecorator_IsLowHealth.h"
 
 #include "AIController.h"
+#include "RLGameplayTags.h"
 #include "ActionSystem/RLActionSystemComponent.h"
 
 bool URLBTDecorator_IsLowHealth::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
@@ -13,7 +14,8 @@ bool URLBTDecorator_IsLowHealth::CalculateRawConditionValue(UBehaviorTreeCompone
 	
 	URLActionSystemComponent* ActionComp = Pawn->GetComponentByClass<URLActionSystemComponent>();
 	/* Checking if the current health % is lower than the LowHealthThreshold of 30% */
-	if ((ActionComp->GetHealth() / ActionComp->GetMaxHealth())<= LowHealthThreshold)
+	if ((ActionComp->GetAttribute(RLGameplayTags::Attribute_Health)->GetValue() / 
+		ActionComp->GetAttribute(RLGameplayTags::Attribute_HealthMax)->GetValue())<= LowHealthThreshold)
 	{
 		return true;
 	}

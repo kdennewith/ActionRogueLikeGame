@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "UObject/Object.h"
 #include "RLAction.generated.h"
 
@@ -18,7 +19,13 @@ class ACTIONRL_API URLAction : public UObject
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Actions")
-	FName ActionName = FName("PrimaryAttack");
+	FGameplayTag ActionName;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Actions")
+	FGameplayTagContainer GrantTags;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Actions")
+	FGameplayTagContainer BlockedTags;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Actions")
 	float CooldownTime = 0.f;
@@ -40,12 +47,12 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category="Actions")
 	void StartAction();
 	
-	/** Starts an Actor Action */
+	/** Stops an Actor Action */
 	UFUNCTION(BlueprintNativeEvent, Category="Actions")
 	void StopAction();
 	
 	/** Getter for the Actors ActionName */
-	FName GetActionName() const { return ActionName; }
+	FGameplayTag GetActionName() const { return ActionName; }
 	
 	bool CanStart();
 	

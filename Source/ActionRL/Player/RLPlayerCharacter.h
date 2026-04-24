@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "RLPlayerCharacter.generated.h"
 
+struct FGameplayTag;
 class ARLProjectileBase;
 struct FInputActionInstance;
 struct FInputActionValue;
@@ -75,9 +76,9 @@ protected:
 	
 	void Look(const FInputActionInstance& InValue);
 	
-	void StartAction(FName InActionName);
+	void StartAction(FGameplayTag InActionName);
 	
-	void StopAction(FName InActionName);
+	void StopAction(FGameplayTag InActionName);
 	
 public:	
 	

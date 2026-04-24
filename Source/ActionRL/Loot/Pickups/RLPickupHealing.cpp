@@ -3,7 +3,9 @@
 
 #include "RLPickupHealing.h"
 
+#include "RLGameplayTags.h"
 #include "ActionSystem/RLActionSystemComponent.h"
+#include "Core/RLGameplayStatics.h"
 #include "Kismet/GameplayStatics.h"
 
 ARLPickupHealing::ARLPickupHealing()
@@ -16,9 +18,9 @@ void ARLPickupHealing::OnActorOverlapped(UPrimitiveComponent* OverlappedComponen
 {
 	URLActionSystemComponent* ActionComp = OtherActor->GetComponentByClass<URLActionSystemComponent>();
 	
-	if (ensure(ActionComp != nullptr) && !ActionComp->IsFullHealth())
+	if (ensure(ActionComp != nullptr) && !URLGameplayStatics::IsFullHealth(ActionComp))
 	{
-		ActionComp->ApplyHealing(HealingAmount);
+		ActionComp->ApplyAttributeChange(RLGameplayTags::Attribute_Health ,HealingAmount, EAttributeModifyType::Base);
 		
 		UGameplayStatics::PlaySoundAtLocation(this, PickupSoundComponent, GetActorLocation(), FRotator::ZeroRotator);
 		

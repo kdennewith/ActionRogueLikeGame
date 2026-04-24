@@ -4,6 +4,7 @@
 #include "RLBTTask_FleeHeal.h"
 
 #include "AIController.h"
+#include "RLGameplayTags.h"
 #include "ActionSystem/RLActionSystemComponent.h"
 
 EBTNodeResult::Type URLBTTask_FleeHeal::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -14,7 +15,7 @@ EBTNodeResult::Type URLBTTask_FleeHeal::ExecuteTask(UBehaviorTreeComponent& Owne
 	URLActionSystemComponent* ActionComp = Pawn->GetComponentByClass<URLActionSystemComponent>();
 	if (ensure(ActionComp))
 	{
-		ActionComp->ApplyHealing(HealAmount);
+		ActionComp->ApplyAttributeChange(RLGameplayTags::Attribute_Health, HealAmount, EAttributeModifyType::Base);
 		return EBTNodeResult::Succeeded;
 	}
 	

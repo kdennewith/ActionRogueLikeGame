@@ -3,6 +3,7 @@
 
 #include "RLAICharacter.h"
 
+#include "RLGameplayTags.h"
 #include "ActionSystem/RLActionSystemComponent.h"
 
 
@@ -16,7 +17,7 @@ float ARLAICharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& 
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
-	ActionSystemComponent->ApplyDamage(-ActualDamage);
+	ActionSystemComponent->ApplyAttributeChange(RLGameplayTags::Attribute_Health, -DamageAmount, EAttributeModifyType::Base);
 	
 	return ActualDamage;
 }
