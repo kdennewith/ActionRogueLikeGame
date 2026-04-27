@@ -5,9 +5,10 @@
 
 
 
-URLHealthAttributeSet::URLHealthAttributeSet() : Health(100.f), HealthMax(100.f)
-{
-}
+URLHealthAttributeSet::URLHealthAttributeSet() : 
+Health(100.f), /** The Base Health */
+HealthMax(100.f)
+{}
 
 void URLHealthAttributeSet::PostAttributeChanged()
 {

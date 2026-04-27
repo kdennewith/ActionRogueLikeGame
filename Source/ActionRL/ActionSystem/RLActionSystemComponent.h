@@ -21,8 +21,7 @@ enum class EAttributeModifyType
 	Invalid,
 };
 
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, NewHealth, float, OldHealth);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnAttributeChanged, FGameplayTag /*AttributeTag*/,  float /*NewAttributeValue*/, float /*OldAttributeValue*/ );
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTIONRL_API URLActionSystemComponent : public UActorComponent
@@ -31,22 +30,20 @@ class ACTIONRL_API URLActionSystemComponent : public UActorComponent
 	
 public:
 	
-	/* BlueprintAssignable is C++ Delegate specific */
-	UPROPERTY(BlueprintAssignable)
-	FOnHealthChanged OnHealthChanged;
-	
 	FGameplayTagContainer ActiveGameplayTags;
 	
 protected:
 	
+	/** The Attributes set */
 	UPROPERTY(BlueprintReadOnly, Category="Attributes")
 	TObjectPtr<URLAttributeSet> Attributes;
-	
 	
 	TMap<FGameplayTag, FRLAttribute*> CachedAttributes;
 	
 	UPROPERTY(EditAnywhere, Category="Attributes")
 	TSubclassOf<URLAttributeSet> AttributeSetClass;
+	
+	TMap<FGameplayTag, FOnAttributeChanged> AttributeListeners;
 	
 	/* An array to hold all the Actions for the Character */
 	UPROPERTY()
@@ -64,9 +61,11 @@ public:
 	virtual void InitializeComponent() override;
 	
 	/* Applies a change to a ActionSystemComponents Attribute */
-	void ApplyAttributeChange(FGameplayTag AttributeTag, float InValue, EAttributeModifyType ModifyType);
+	void ApplyAttributeChange(FGameplayTag InAttributeTag, float InValue, EAttributeModifyType ModifyType);
 	
 	FRLAttribute* GetAttribute(FGameplayTag InAttributeTag);
+	
+	FOnAttributeChanged& GetAttributeListener(FGameplayTag InAttributeTag);
 	
 	/** Starts an Actor Action */
 	void StartAction(FGameplayTag InActionName);
@@ -77,4 +76,5 @@ public:
 	/** Grants Actions/Abilities to the RLActionSystemComponent as an Array in Actions */
 	void GrantAction(TSubclassOf<URLAction> NewActionClass);
 	
+	void OnHealthChanged(FGameplayTag AttributeTag,  float NewAttributeValue, float OldAttributeValue);
 };

@@ -2,7 +2,7 @@
 
 
 #include "RLAction.h"
-
+#include "Logging/StructuredLog.h"
 #include "RLActionSystemComponent.h"
 
 void URLAction::StartAction_Implementation()
@@ -45,7 +45,7 @@ bool URLAction::CanStart()
 	
 	if (GetCooldownTimeRemaining() > 0.f)
 	{
-		UE_LOG(LogTemp, Log, TEXT("CD Remaining %f"), GetCooldownTimeRemaining())
+		UE_LOG(LogTemp, Log, TEXT("CD Remaining %f"), GetCooldownTimeRemaining());
 		return false;
 	}
 	
@@ -59,7 +59,7 @@ bool URLAction::CanStart()
 
 float URLAction::GetCooldownTimeRemaining() const
 {
-	return FMath::Max(CooldownUntil - GetWorld()->TimeSeconds);
+	return FMath::Max(0.f, CooldownUntil - GetWorld()->GetTimeSeconds());
 }
 
 

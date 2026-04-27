@@ -33,7 +33,7 @@ void ARLPlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	
-	ActionSystemComponent->OnHealthChanged.AddDynamic(this, &ThisClass::OnHealthChanged);
+	ActionSystemComponent->GetAttributeListener(RLGameplayTags::Attribute_Health).AddUObject(this, &ThisClass::OnHealthChanged);
 }
 
 // Called to bind functionality to input
@@ -114,7 +114,7 @@ void ARLPlayerCharacter::StopAction(FGameplayTag InActionName)
 	ActionSystemComponent->StopAction(InActionName);
 }
 
-void ARLPlayerCharacter::OnHealthChanged(float NewHealth, float OldHealth)
+void ARLPlayerCharacter::OnHealthChanged(FGameplayTag AttributeTag, float NewHealth, float OldHealth)
 {
 	/* Dun Goofed and Died? */
 	if (FMath::IsNearlyZero(NewHealth))
@@ -136,7 +136,7 @@ float ARLPlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent con
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
 	/* Apply the Health Change Stuff here */
-	ActionSystemComponent->ApplyAttributeChange(RLGameplayTags::Attribute_Health, -DamageAmount, EAttributeModifyType::Base);
+	ActionSystemComponent->ApplyAttributeChange(RLGameplayTags::Attribute_Health, -ActualDamage, EAttributeModifyType::Base);
 	
 	return ActualDamage;
 }

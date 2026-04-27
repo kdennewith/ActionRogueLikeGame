@@ -15,6 +15,8 @@ class ACTIONRL_API URLGameplayStatics : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
+	/** Marked Functions 'static <type> <FunctionName>()' because there will never be an Instance of a RLGameplayStatics */
+	
 	
 	static bool IsFullHealth(URLActionSystemComponent* ActionComp);
 };

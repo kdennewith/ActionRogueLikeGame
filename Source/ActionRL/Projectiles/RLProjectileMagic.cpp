@@ -20,7 +20,7 @@ void ARLProjectileMagic::OnActorHit(UPrimitiveComponent* HitComponent, AActor* O
 	Super::OnActorHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit); /* This is the Base Implementation located in RLProjectileBase.cpp */
 	
 	FVector HitFromDirection = GetActorRotation().Vector();
-	UGameplayStatics::ApplyPointDamage(OtherActor, 10.f, HitFromDirection, Hit, GetInstigatorController(),
+	UGameplayStatics::ApplyPointDamage(OtherActor, 10.0f, HitFromDirection, Hit, GetInstigatorController(),
 		this, DmgTypeClass);
 }
 

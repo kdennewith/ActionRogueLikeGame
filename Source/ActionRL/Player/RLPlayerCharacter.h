@@ -69,9 +69,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<URLActionSystemComponent> ActionSystemComponent;
 	
-	UFUNCTION()
-	void OnHealthChanged(float NewHealth, float OldHealth);
-	
 	void Move(const FInputActionValue& InValue);
 	
 	void Look(const FInputActionInstance& InValue);
@@ -81,6 +78,8 @@ protected:
 	void StopAction(FGameplayTag InActionName);
 	
 public:	
+	
+	void OnHealthChanged(FGameplayTag AttributeTag, float NewHealth, float OldHealth);
 	
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	

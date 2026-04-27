@@ -49,12 +49,15 @@ class URLHealthAttributeSet : public URLAttributeSet
 
 public:
 	
+	/** The Health Param of the Attribute Set */
 	UPROPERTY(EditAnywhere, Category="Attributes")
 	FRLAttribute Health;
 	
+	/** The Max Health Param of the Attribute Set */
 	UPROPERTY(EditAnywhere, Category="Attributes")
 	FRLAttribute HealthMax;
 	
+	/** Controls what happens after an Attribute is Changed within the URLHealthAttributeSet */
 	virtual void PostAttributeChanged() override;
 	
 	URLHealthAttributeSet();
