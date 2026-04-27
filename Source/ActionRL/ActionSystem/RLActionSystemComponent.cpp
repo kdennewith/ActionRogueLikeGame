@@ -5,7 +5,6 @@
 #include "Logging/StructuredLog.h"
 #include "RLAction.h"
 #include "RLAttributeSet.h"
-#include "RLGameplayTags.h"
 
 /** Constructor */
 URLActionSystemComponent::URLActionSystemComponent()
@@ -15,6 +14,7 @@ URLActionSystemComponent::URLActionSystemComponent()
 	/** Setting the Attribute Class to HealthAttribute Sets. Check the RLAttributeSet.cpp/h. */
 	AttributeSetClass = URLHealthAttributeSet::StaticClass();
 }
+
 
 /* Initializes the Component on Level Startup, Fills up the Action Array */
 void URLActionSystemComponent::InitializeComponent()
@@ -50,8 +50,14 @@ void URLActionSystemComponent::InitializeComponent()
 		}
 	}
 	
-	FOnAttributeChanged& Event = AttributeListeners.FindOrAdd(RLGameplayTags::Attribute_Health);
-	Event.AddUObject(this, &ThisClass::OnHealthChanged);
+}
+
+void URLActionSystemComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	/** Applies the MovementSpeed */
+	Attributes->InitializeAttributes();
 }
 
 /** Grants Actions/Abilities to the RLActionSystemComponent as an Array in Actions */
@@ -135,16 +141,11 @@ void URLActionSystemComponent::ApplyAttributeChange(FGameplayTag InAttributeTag,
 	UE_LOGFMT(LogTemp, Log, "Attribute: {AttributeTag}, New: {NewValue}", ("AttributeTag", InAttributeTag.ToString()), ("NewValue", FoundAttribute->GetValue()));
 }
 
-void URLActionSystemComponent::OnHealthChanged(FGameplayTag AttributeTag, float NewAttributeValue, float OldAttributeValue)
-{
-	;
-}
-
 FRLAttribute* URLActionSystemComponent::GetAttribute(FGameplayTag InAttributeTag)
 {
-	if (FRLAttribute** FoundAttribute = CachedAttributes.Find(InAttributeTag))
+	if (FRLAttribute* FoundAttribute = *CachedAttributes.Find(InAttributeTag))
 	{
-		return *FoundAttribute;
+		return FoundAttribute;
 	}
 	return nullptr;
 }

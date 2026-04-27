@@ -7,6 +7,8 @@
 #include "RLAttributeSet.generated.h"
 
 
+class URLActionSystemComponent;
+
 USTRUCT()
 struct FRLAttribute
 {
@@ -36,7 +38,11 @@ class ACTIONRL_API URLAttributeSet : public UObject
 	
 public:
 	
+	virtual void InitializeAttributes() {};
+	
 	virtual void PostAttributeChanged() {};
+	
+	URLActionSystemComponent* GetOwningComponent() const;
 };
 
 /**
@@ -61,4 +67,54 @@ public:
 	virtual void PostAttributeChanged() override;
 	
 	URLHealthAttributeSet();
+};
+
+/**
+ * Pawn Attribute Set ------------------------------------------------------------------------------------------------
+ */
+UCLASS()
+class URLPawnAttributeSet : public URLHealthAttributeSet
+{
+	GENERATED_BODY()
+	
+public:
+	
+	/** Walking speed linked with Character Movement Component */
+	UPROPERTY(EditAnywhere, Category="Attributes")
+	FRLAttribute MoveSpeed;
+	
+	/** Controls what happens after an Attribute is Changed within the URLHealthAttributeSet */
+	virtual void PostAttributeChanged() override;
+	
+	virtual void InitializeAttributes() override;
+	
+	void ApplyMoveSpeed();
+	
+	URLPawnAttributeSet();
+};
+
+/**
+ * Player Attribute Set ------------------------------------------------------------------------------------------------
+ */
+UCLASS()
+class URLPlayerAttributeSet : public URLPawnAttributeSet
+{
+	GENERATED_BODY()
+	
+public:
+	
+	URLPlayerAttributeSet();
+};
+
+/**
+ * Monster Attribute Set ------------------------------------------------------------------------------------------------
+ */
+UCLASS()
+class URLMonsterAttributeSet : public URLPawnAttributeSet
+{
+	GENERATED_BODY()
+	
+public:
+	
+	URLMonsterAttributeSet();
 };

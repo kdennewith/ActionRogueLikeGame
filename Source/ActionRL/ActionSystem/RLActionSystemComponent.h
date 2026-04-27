@@ -60,6 +60,8 @@ public:
 	/* Initializes the Component on Level Startup */
 	virtual void InitializeComponent() override;
 	
+	virtual void BeginPlay() override;
+	
 	/* Applies a change to a ActionSystemComponents Attribute */
 	void ApplyAttributeChange(FGameplayTag InAttributeTag, float InValue, EAttributeModifyType ModifyType);
 	
@@ -76,5 +78,4 @@ public:
 	/** Grants Actions/Abilities to the RLActionSystemComponent as an Array in Actions */
 	void GrantAction(TSubclassOf<URLAction> NewActionClass);
 	
-	void OnHealthChanged(FGameplayTag AttributeTag,  float NewAttributeValue, float OldAttributeValue);
 };
